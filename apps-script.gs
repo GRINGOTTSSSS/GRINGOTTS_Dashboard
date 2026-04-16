@@ -3,7 +3,7 @@
 // SETUP INSTRUCTIONS:
 // 1. Open your Google Sheet
 // 2. Click Extensions > Apps Script
-// 3. Delete all existing code and paste this entire file
+// 3. Delete all existing code and paste this entire file 
 // 4. Click Save, then Deploy > New Deployment
 // 5. Choose "Web App", set access to "Anyone"
 // 6. Click Deploy, copy the Web App URL
