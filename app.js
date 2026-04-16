@@ -20,7 +20,7 @@ const SCRIPT_URL = https://script.google.com/macros/s/AKfycbyVYu3CgS3dbV0vBtxJ1P
 const SYNC_MS    = 5 * 60 * 1000;
 const CREDS      = { u: "admin", p: "M@gic1994" };
 
-const CSV_URL  = `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/pub?gid=${SHEET_GID}&single=true&output=csv`;
+const CSV_URL  = "`https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/pub?gid=${SHEET_GID}&single=true&output=csv`";
 const HTML_URL = `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/pubhtml?gid=${SHEET_GID}&single=true`;
 
 // ── STATE ─────────────────────────────────────────────────────────
