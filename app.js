@@ -16,7 +16,7 @@
 // ── CONFIG ────────────────────────────────────────────────────────
 const SHEET_ID   = "2PACX-1vT7XvRzC1uZF7L9UbioAw2dwXgddHKfby00ZZqD4JmB_WVOqn5yiaXkl6Lm3o8apnT2TN7TJCGFNgCq";
 const SHEET_GID  = "0";
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx22iSwfziaVySEMtvd7RaOFcn4f4Wv98yOyW8qLjoD1f053WA6YHcu9SRWUdmz190Y/exec";
+const SCRIPT_URL = https://script.google.com/macros/s/AKfycbyVYu3CgS3dbV0vBtxJ1PEt_XtexXfL0VJ_SASk1aIZGHOQyRIIh2LpcU1Dluafi9zb/exec;
 const SYNC_MS    = 5 * 60 * 1000;
 const CREDS      = { u: "admin", p: "M@gic1994" };
 
