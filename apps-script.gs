@@ -1,107 +1,116 @@
 // ================================================================
 //  GRINGOTTS DASHBOARD — Google Apps Script
-//  METHOD: Everything via GET requests (URL parameters)
-//  This completely bypasses the POST/CORS redirect problem.
 //
-//  SETUP:
+//  HOW TO INSTALL:
 //  1. Open your Google Sheet
-//  2. Extensions → Apps Script
-//  3. Delete ALL code, paste this entire file
-//  4. Save (Ctrl+S)
-//  5. Deploy → New Deployment
-//     Type: Web App
-//     Execute as: Me
-//     Who has access: Anyone (anonymous)
-//  6. Copy the Web App URL → paste into app.js as SCRIPT_URL
-//  7. Every time you edit this script, do:
-//     Deploy → Manage Deployments → edit → New version → Deploy
+//  2. Click Extensions → Apps Script
+//  3. You will see a code editor open
+//  4. Select ALL the existing code (Ctrl+A) and DELETE it
+//  5. Copy and paste THIS entire file into the editor
+//  6. Press Ctrl+S to save — name it anything e.g. "Gringotts"
+//  7. Click "Deploy" button (top right) → "New deployment"
+//  8. Click the gear icon ⚙ next to "Type" → select "Web app"
+//  9. Settings:
+//       Description: Gringotts Dashboard
+//       Execute as:  Me
+//       Who has access: Anyone
+// 10. Click "Deploy"
+// 11. Click "Authorize access" → choose your Google account → Allow
+// 12. Copy the Web app URL shown (looks like:
+//     https://script.google.com/macros/s/LONG_ID_HERE/exec)
+// 13. Open index.html in a text editor
+// 14. Find this line near the top of the <script> section:
+//       const SCRIPT_URL = "https://script.google.com/...";
+// 15. Replace the URL inside quotes with your new URL
+// 16. Save index.html and upload to GitHub
+//
+//  TO TEST: Open your Apps Script URL in browser and add ?action=ping
+//  Example: https://script.google.com/.../exec?action=ping
+//  You should see: {"ok":true,"message":"Apps Script is working!"}
 // ================================================================
 
-const SHEET_NAME = "Sheet1";
-const HEADERS    = ["ID","Tracking","Customer","Origin","Destination","Status","Date","Weight","Notes"];
+var SHEET_NAME = "Sheet1";
+var HEADERS    = ["ID","Tracking","Customer","Origin","Destination","Status","Date","Weight","Notes"];
 
+// All requests come in as GET with ?action=... parameters
 function doGet(e) {
-  const action = e.parameter.action || "ping";
+  var action = e.parameter.action || "ping";
 
   try {
-    let result;
-
     if (action === "ping") {
-      result = { ok: true, message: "Apps Script is working!" };
-    }
-    else if (action === "getAll") {
-      result = { ok: true, data: getAllRows() };
-    }
-    else if (action === "updateStatus") {
-      const id     = e.parameter.id     || "";
-      const status = e.parameter.status || "";
-      if (!id || !status) throw new Error("Missing id or status parameter");
-      updateStatus(id, status);
-      result = { ok: true, action: "updateStatus", id: id, status: status };
-    }
-    else if (action === "addShipment") {
-      const encoded = e.parameter.data || "";
-      if (!encoded) throw new Error("Missing data parameter");
-      const shipment = JSON.parse(decodeURIComponent(encoded));
-      addRow(shipment);
-      result = { ok: true, action: "addShipment", id: shipment.ID };
-    }
-    else {
-      result = { ok: false, error: "Unknown action: " + action };
+      return respond({ ok: true, message: "Apps Script is working!" });
     }
 
-    return buildResponse(result);
+    if (action === "updateStatus") {
+      var id     = e.parameter.id     || "";
+      var status = e.parameter.status || "";
+      if (!id)     return respond({ ok: false, error: "Missing: id" });
+      if (!status) return respond({ ok: false, error: "Missing: status" });
+      updateStatus(id, status);
+      return respond({ ok: true, action: "updateStatus", id: id, status: status });
+    }
+
+    if (action === "addShipment") {
+      var encoded = e.parameter.data || "";
+      if (!encoded) return respond({ ok: false, error: "Missing: data" });
+      var shipment = JSON.parse(decodeURIComponent(encoded));
+      addRow(shipment);
+      return respond({ ok: true, action: "addShipment", id: shipment.ID });
+    }
+
+    return respond({ ok: false, error: "Unknown action: " + action });
 
   } catch(err) {
-    return buildResponse({ ok: false, error: err.message });
+    return respond({ ok: false, error: err.message });
   }
 }
 
-// ── Build response with CORS headers ─────────────────────────────
-function buildResponse(data) {
-  const json   = JSON.stringify(data);
-  const output = ContentService.createTextOutput(json)
+// Build a JSON response
+function respond(data) {
+  return ContentService
+    .createTextOutput(JSON.stringify(data))
     .setMimeType(ContentService.MimeType.JSON);
-  return output;
 }
 
-// ── Get all rows ──────────────────────────────────────────────────
+// Get all rows as objects
 function getAllRows() {
-  const sheet = getSheet();
-  const last  = sheet.getLastRow();
-  if (last < 2) return [];
-  const data = sheet.getDataRange().getValues();
-  const hdrs = data[0].map(h => String(h).trim());
-  const out  = [];
+  var sheet = getSheet();
+  var data  = sheet.getDataRange().getValues();
+  if (data.length < 2) return [];
+  var hdrs = data[0].map(function(h){ return String(h).trim(); });
+  var out  = [];
   for (var i = 1; i < data.length; i++) {
     var row = data[i];
     if (row.every(function(c){ return String(c).trim() === ""; })) continue;
-    var obj = { _row: i + 1 };
+    var obj = {};
     hdrs.forEach(function(h, j){ obj[h] = String(row[j] || "").trim(); });
+    obj._row = i + 1;
     out.push(obj);
   }
   return out;
 }
 
-// ── Add new row ───────────────────────────────────────────────────
+// Add a new row to the sheet
 function addRow(shipment) {
-  const sheet = getSheet();
+  var sheet = getSheet();
   ensureHeaders(sheet);
-  const row = HEADERS.map(function(h){ return shipment[h] !== undefined ? shipment[h] : ""; });
+  var row = HEADERS.map(function(h){
+    return shipment[h] !== undefined ? String(shipment[h]) : "";
+  });
   sheet.appendRow(row);
   SpreadsheetApp.flush();
 }
 
-// ── Update status by ID ───────────────────────────────────────────
+// Find row by ID and update Status column
 function updateStatus(id, newStatus) {
-  const sheet  = getSheet();
-  const data   = sheet.getDataRange().getValues();
-  const hdrs   = data[0].map(function(h){ return String(h).trim(); });
-  const idCol  = hdrs.indexOf("ID");
-  const stCol  = hdrs.indexOf("Status");
+  var sheet  = getSheet();
+  var data   = sheet.getDataRange().getValues();
+  var hdrs   = data[0].map(function(h){ return String(h).trim(); });
+  var idCol  = hdrs.indexOf("ID");
+  var stCol  = hdrs.indexOf("Status");
 
-  if (idCol < 0) throw new Error("No 'ID' column in row 1. Check headers.");
-  if (stCol < 0) throw new Error("No 'Status' column in row 1. Check headers.");
+  if (idCol < 0) throw new Error("No 'ID' column found in row 1 of your sheet");
+  if (stCol < 0) throw new Error("No 'Status' column found in row 1 of your sheet");
 
   for (var i = 1; i < data.length; i++) {
     if (String(data[i][idCol]).trim() === String(id).trim()) {
@@ -110,23 +119,27 @@ function updateStatus(id, newStatus) {
       return;
     }
   }
-  throw new Error("ID '" + id + "' not found in sheet");
+  throw new Error("Shipment ID '" + id + "' was not found in the sheet");
 }
 
-// ── Ensure headers in row 1 ───────────────────────────────────────
+// Make sure row 1 has the correct headers
 function ensureHeaders(sheet) {
-  var firstRow = sheet.getRange(1, 1, 1, HEADERS.length).getValues()[0];
+  var range    = sheet.getRange(1, 1, 1, HEADERS.length);
+  var firstRow = range.getValues()[0];
   if (firstRow.every(function(c){ return !String(c).trim(); })) {
-    sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
-    sheet.getRange(1, 1, 1, HEADERS.length).setFontWeight("bold");
+    range.setValues([HEADERS]);
+    range.setFontWeight("bold");
     SpreadsheetApp.flush();
   }
 }
 
-// ── Get sheet by name ─────────────────────────────────────────────
+// Get the Sheet1 tab
 function getSheet() {
   var ss    = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName(SHEET_NAME);
-  if (!sheet) throw new Error("Sheet '" + SHEET_NAME + "' not found");
+  if (!sheet) throw new Error(
+    "Tab named '" + SHEET_NAME + "' not found. " +
+    "Make sure your sheet tab at the bottom is named Sheet1"
+  );
   return sheet;
 }
