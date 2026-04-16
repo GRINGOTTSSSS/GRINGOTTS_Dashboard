@@ -4,7 +4,7 @@
 */
 
 // ── CONFIG ────────────────────────────────────────────────────────
-var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxwrTyg0p_cMVpdTG9VdL0eJ9i-2iDpTT5UVhrTdgjYKQYzG_bgLKylwg6s0a4Ic7BY/exec";
+var SCRIPT_URL = https://script.google.com/macros/s/AKfycbwH1xM5hEFtW3mj98HmiOGGUSQoxNfBIhgO8H3b6F5gEiSQK0L4yf697izD5TS6skEv/exec;
 var SHEET_ID   = "2PACX-1vT7XvRzC1uZF7L9UbioAw2dwXgddHKfby00ZZqD4JmB_WVOqn5yiaXkl6Lm3o8apnT2TN7TJCGFNgCq";
 var SHEET_GID  = "0";
 var CSV_URL    = "https://docs.google.com/spreadsheets/d/e/" + SHEET_ID + "/pub?gid=" + SHEET_GID + "&single=true&output=csv";
