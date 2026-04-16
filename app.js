@@ -2,7 +2,7 @@
    Columns: Inquiry, BillOfLading, Customer, Origin, Destination, Type, Status, Date, Containers
 */
 
-var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwH1xM5hEFtW3mj98HmiOGGUSQoxNfBIhgO8H3b6F5gEiSQK0L4yf697izD5TS6skEv/exec";
+var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyWBMgW4udqYAwFKLyDIgGo42lW266P07_BbCEnIz8fWojmZcPXnXlv-imX9Az21Hiq/exec";
 var SHEET_ID   = "2PACX-1vT7XvRzC1uZF7L9UbioAw2dwXgddHKfby00ZZqD4JmB_WVOqn5yiaXkl6Lm3o8apnT2TN7TJCGFNgCq";
 var SHEET_GID  = "0";
 var CSV_URL    = "https://docs.google.com/spreadsheets/d/e/"+SHEET_ID+"/pub?gid="+SHEET_GID+"&single=true&output=csv";
