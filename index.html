@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>GRINGOTTS — Shipment Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ░░ LOGIN ░░ -->
+  <div id="loginScreen">
+    <canvas id="loginCanvas"></canvas>
+    <div class="login-wrap">
+      <div class="login-brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 48 48" fill="none"><polygon points="24,4 44,14 44,34 24,44 4,34 4,14" fill="none" stroke="currentColor" stroke-width="2"/><polygon points="24,12 36,18 36,30 24,36 12,30 12,18" fill="currentColor" opacity="0.15"/><line x1="24" y1="4" x2="24" y2="44" stroke="currentColor" stroke-width="1" opacity="0.4"/><line x1="4" y1="14" x2="44" y2="34" stroke="currentColor" stroke-width="1" opacity="0.4"/><line x1="44" y1="14" x2="4" y2="34" stroke="currentColor" stroke-width="1" opacity="0.4"/></svg>
+        </div>
+        <h1 class="brand-name">GRINGOTTS</h1>
+        <p class="brand-tagline" id="loginSub">Shipment Command Center</p>
+      </div>
+
+      <div class="login-card">
+        <div class="lfield">
+          <label id="lblUser">USERNAME</label>
+          <input type="text" id="loginUser" autocomplete="username" spellcheck="false" />
+        </div>
+        <div class="lfield">
+          <label id="lblPass">PASSWORD</label>
+          <div class="pw-row">
+            <input type="password" id="loginPass" autocomplete="current-password" />
+            <button type="button" class="pw-eye" onclick="togglePw()" aria-label="toggle password">
+              <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <p class="login-err" id="loginErr"></p>
+        <button type="button" class="btn-signin" id="btnLogin" onclick="doLogin()">
+          <span>SIGN IN</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+        <div class="login-langs">
+          <button type="button" class="lbtn active" data-lang="en" onclick="setLang('en')">EN</button>
+          <span class="ldiv">|</span>
+          <button type="button" class="lbtn" data-lang="ar" onclick="setLang('ar')">AR</button>
+          <span class="ldiv">|</span>
+          <button type="button" class="lbtn" data-lang="fa" onclick="setLang('fa')">FA</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ░░ APP ░░ -->
+  <div id="app" class="hidden">
+
+    <!-- Sidebar -->
+    <aside id="sidebar">
+      <div class="sb-head">
+        <div class="sb-logo">
+          <svg viewBox="0 0 48 48" fill="none"><polygon points="24,4 44,14 44,34 24,44 4,34 4,14" fill="none" stroke="currentColor" stroke-width="2"/><polygon points="24,12 36,18 36,30 24,36 12,30 12,18" fill="currentColor" opacity="0.2"/></svg>
+        </div>
+        <div>
+          <div class="sb-name">GRINGOTTS</div>
+          <div class="sb-sub" data-i18n="login_sub">Shipment Center</div>
+        </div>
+      </div>
+
+      <nav class="sb-nav">
+        <button type="button" class="nb active" data-sec="dashboard" onclick="showSec('dashboard',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          <span data-i18n="nav_dashboard">Dashboard</span>
+        </button>
+        <button type="button" class="nb" data-sec="shipments" onclick="showSec('shipments',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          <span data-i18n="nav_shipments">Shipments</span>
+        </button>
+        <button type="button" class="nb" data-sec="add" onclick="showSec('add',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          <span data-i18n="nav_add">Add Shipment</span>
+        </button>
+      </nav>
+
+      <div class="sb-foot">
+        <div class="sync-pill" id="syncPill">
+          <span class="sync-dot" id="syncDot"></span>
+          <span id="syncTxt">Ready</span>
+        </div>
+        <div class="sb-controls">
+          <button type="button" class="ctrl-btn" onclick="cycleTheme()" id="themeBtn" title="Toggle theme">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
+          <div class="lang-row">
+            <button type="button" class="lbtn active" data-lang="en" onclick="setLang('en')">EN</button>
+            <button type="button" class="lbtn" data-lang="ar" onclick="setLang('ar')">AR</button>
+            <button type="button" class="lbtn" data-lang="fa" onclick="setLang('fa')">FA</button>
+          </div>
+        </div>
+        <button type="button" class="btn-logout" onclick="doLogout()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <span data-i18n="logout">Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Mobile topbar -->
+    <header id="mobileBar">
+      <button type="button" class="hbtn" onclick="toggleSidebar()" id="menuBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="mbar-brand">GRINGOTTS</div>
+      <div class="mbar-right">
+        <button type="button" class="hbtn" onclick="cycleTheme()" id="themeBtnM">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main content -->
+    <main id="mainContent">
+
+      <!-- Page header -->
+      <div class="page-hdr">
+        <div class="page-hdr-left">
+          <h1 class="page-title" id="pageTitle" data-i18n="nav_dashboard">Dashboard</h1>
+          <span class="sync-time" id="lastSync"></span>
+        </div>
+        <div class="page-hdr-right">
+          <button type="button" class="ctrl-btn desktop-only" onclick="cycleTheme()" id="themeBtn2" title="Toggle theme">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
+          <div class="lang-row desktop-only">
+            <button type="button" class="lbtn active" data-lang="en" onclick="setLang('en')">EN</button>
+            <button type="button" class="lbtn" data-lang="ar" onclick="setLang('ar')">AR</button>
+            <button type="button" class="lbtn" data-lang="fa" onclick="setLang('fa')">FA</button>
+          </div>
+          <div class="user-chip">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            admin
+          </div>
+        </div>
+      </div>
+
+      <!-- ░ SECTION: DASHBOARD ░ -->
+      <section id="sec-dashboard" class="sec">
+        <div class="kpi-grid">
+          <div class="kpi-card" id="kpi0">
+            <div class="kpi-icon kpi-total">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+            </div>
+            <div class="kpi-val" id="kTotal">0</div>
+            <div class="kpi-lbl" data-i18n="stat_total">Total</div>
+          </div>
+          <div class="kpi-card" id="kpi1">
+            <div class="kpi-icon kpi-transit">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            </div>
+            <div class="kpi-val" id="kTransit">0</div>
+            <div class="kpi-lbl" data-i18n="stat_transit">In Transit</div>
+          </div>
+          <div class="kpi-card" id="kpi2">
+            <div class="kpi-icon kpi-delivered">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="kpi-val" id="kDelivered">0</div>
+            <div class="kpi-lbl" data-i18n="stat_delivered">Delivered</div>
+          </div>
+          <div class="kpi-card" id="kpi3">
+            <div class="kpi-icon kpi-pending">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="kpi-val" id="kPending">0</div>
+            <div class="kpi-lbl" data-i18n="stat_pending">Pending</div>
+          </div>
+          <div class="kpi-card" id="kpi4">
+            <div class="kpi-icon kpi-returned">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.65"/></svg>
+            </div>
+            <div class="kpi-val" id="kReturned">0</div>
+            <div class="kpi-lbl" data-i18n="stat_returned">Returned</div>
+          </div>
+        </div>
+
+        <div class="charts-row">
+          <div class="chart-box" id="chartBoxStatus">
+            <div class="chart-box-hdr">
+              <span class="chart-box-title" data-i18n="chart_status">Status Breakdown</span>
+            </div>
+            <div class="chart-wrap"><canvas id="cStatus"></canvas></div>
+          </div>
+          <div class="chart-box" id="chartBoxAct">
+            <div class="chart-box-hdr">
+              <span class="chart-box-title" data-i18n="chart_recent">Activity — 7 Days</span>
+            </div>
+            <div class="chart-wrap"><canvas id="cActivity"></canvas></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-hdr">
+            <span class="panel-title" data-i18n="recent">Recent Shipments</span>
+            <button type="button" class="btn-ghost" onclick="showSec('shipments',document.querySelector('[data-sec=shipments]'))" data-i18n="view_all">View All →</button>
+          </div>
+          <div class="tbl-scroll">
+            <table class="data-table" id="recentTable">
+              <thead>
+                <tr>
+                  <th data-i18n="col_id">ID</th>
+                  <th data-i18n="col_cust">Customer</th>
+                  <th data-i18n="col_dest">Destination</th>
+                  <th data-i18n="col_stat">Status</th>
+                  <th data-i18n="col_date">Date</th>
+                </tr>
+              </thead>
+              <tbody id="recentBody"></tbody>
+            </table>
+          </div>
+          <p class="empty-msg hidden" id="recentEmpty" data-i18n="no_data">No shipments found.</p>
+        </div>
+      </section>
+
+      <!-- ░ SECTION: SHIPMENTS ░ -->
+      <section id="sec-shipments" class="sec hidden">
+        <div class="toolbar">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="searchInp" placeholder="Search shipments…" oninput="filterTbl()" />
+          </div>
+          <select id="filterSel" onchange="filterTbl()">
+            <option value="" data-i18n="all_status">All Statuses</option>
+            <option value="Pending">Pending</option>
+            <option value="In Transit">In Transit</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Returned">Returned</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+          <button type="button" class="btn-outline" onclick="loadData()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.18-4.79"/></svg>
+            <span data-i18n="refresh">Refresh</span>
+          </button>
+        </div>
+
+        <div class="panel">
+          <div class="tbl-scroll">
+            <table class="data-table" id="shipTable">
+              <thead>
+                <tr>
+                  <th data-i18n="col_id">ID</th>
+                  <th data-i18n="col_track">Tracking</th>
+                  <th data-i18n="col_cust">Customer</th>
+                  <th data-i18n="col_orig">Origin</th>
+                  <th data-i18n="col_dest">Destination</th>
+                  <th data-i18n="col_stat">Status</th>
+                  <th data-i18n="col_date">Date</th>
+                  <th data-i18n="col_wt">Weight</th>
+                  <th data-i18n="col_act">Action</th>
+                </tr>
+              </thead>
+              <tbody id="shipBody"></tbody>
+            </table>
+          </div>
+          <p class="empty-msg hidden" id="shipEmpty" data-i18n="no_data">No shipments found.</p>
+        </div>
+      </section>
+
+      <!-- ░ SECTION: ADD ░ -->
+      <section id="sec-add" class="sec hidden">
+        <div class="panel add-panel">
+          <div class="panel-hdr">
+            <span class="panel-title" data-i18n="add_title">New Shipment</span>
+          </div>
+          <div class="add-form">
+            <div class="fgroup">
+              <label data-i18n="col_id">Shipment ID</label>
+              <input type="text" id="aId" />
+            </div>
+            <div class="fgroup">
+              <label data-i18n="col_track">Tracking Number</label>
+              <input type="text" id="aTrack" />
+            </div>
+            <div class="fgroup">
+              <label data-i18n="col_cust">Customer Name</label>
+              <input type="text" id="aCust" />
+            </div>
+            <div class="fgroup">
+              <label data-i18n="col_orig">Origin</label>
+              <input type="text" id="aOrig" />
+            </div>
+            <div class="fgroup">
+              <label data-i18n="col_dest">Destination</label>
+              <input type="text" id="aDest" />
+            </div>
+            <div class="fgroup">
+              <label data-i18n="col_stat">Status</label>
+              <select id="aStat">
+                <option value="Pending">Pending</option>
+                <option value="In Transit">In Transit</option>
+                <option value="Delivered">Delivered</option>
+                <option value="Returned">Returned</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+            </div>
+            <div class="fgroup">
+              <label data-i18n="col_date">Date</label>
+              <input type="date" id="aDate" />
+            </div>
+            <div class="fgroup">
+              <label data-i18n="col_wt">Weight (kg)</label>
+              <input type="number" id="aWt" step="0.1" min="0" />
+            </div>
+            <div class="fgroup fgroup-full">
+              <label data-i18n="col_notes">Notes</label>
+              <textarea id="aNotes" rows="3"></textarea>
+            </div>
+          </div>
+          <div class="add-footer">
+            <button type="button" class="btn-primary" id="btnAdd" onclick="addShipment()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span data-i18n="add_btn">Add to Sheet</span>
+            </button>
+            <p class="form-msg" id="addMsg"></p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div id="sbOverlay" class="hidden" onclick="toggleSidebar()"></div>
+
+  <!-- ░░ EDIT STATUS MODAL ░░ -->
+  <div id="modalBg" class="modal-bg hidden" onclick="closeModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-hdr">
+        <span class="modal-title" data-i18n="edit_status">Update Status</span>
+        <button type="button" class="modal-close" onclick="closeModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-id" id="modalId"></p>
+        <label class="modal-label" data-i18n="col_stat">Status</label>
+        <select id="modalSel">
+          <option value="Pending">Pending</option>
+          <option value="In Transit">In Transit</option>
+          <option value="Delivered">Delivered</option>
+          <option value="Returned">Returned</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="btn-ghost" onclick="closeModal()" data-i18n="cancel">Cancel</button>
+        <button type="button" class="btn-primary" id="btnSubmit" onclick="submitEdit()">
+          <span data-i18n="submit">Confirm Update</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toastEl" class="toast-el hidden"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
