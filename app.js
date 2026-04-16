@@ -14,7 +14,7 @@ const SHEET_PUBLIC_URL =
 // After you deploy the Apps Script, replace the string below
 // with your Web App URL, e.g.:
 // "https://script.google.com/macros/s/AKfycby.../exec"
-const APPS_SCRIPT_URL = "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
+const APPS_SCRIPT_URL = https://script.google.com/macros/s/AKfycbwIELrDRDv-xPWFa1y5C_Q85a7DuKt0binn5lwj7TAN3iPGThDJa82oQrYDJSVTgxVf/exec;
 
 // ── AUTH ──────────────────────────────────────────────────────
 const AUTH = { username: "admin", password: "M@gic1994" };
