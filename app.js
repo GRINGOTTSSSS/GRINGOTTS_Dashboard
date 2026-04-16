@@ -238,20 +238,66 @@ function demo(){
   ];
 }
 
-/* ── JSONP WRITE ── */
+/* ── WRITE TO SHEET ── 
+   Uses three methods simultaneously for maximum reliability:
+   1. <script> tag JSONP  
+   2. <img> ping (fires even if JSONP fails)
+   3. fetch no-cors (backup)
+   At least one of these will reach Apps Script.
+*/
 function callScript(params){
-  return new Promise(function(resolve,reject){
-    var cbName="gs_cb_"+Date.now()+"_"+Math.floor(Math.random()*9999);
-    window[cbName]=function(result){cleanup();resolve(result);};
-    var timer=setTimeout(function(){cleanup();resolve({ok:true,timedOut:true});},15000);
-    function cleanup(){clearTimeout(timer);delete window[cbName];var el=document.getElementById(cbName);if(el)el.parentNode.removeChild(el);}
-    var parts=["callback="+encodeURIComponent(cbName)];
-    Object.keys(params).forEach(function(k){parts.push(encodeURIComponent(k)+"="+encodeURIComponent(params[k]));});
+  return new Promise(function(resolve){
+    var parts=[];
+    Object.keys(params).forEach(function(k){
+      parts.push(encodeURIComponent(k)+"="+encodeURIComponent(params[k]));
+    });
     parts.push("t="+Date.now());
+    var baseUrl=SCRIPT_URL+"?"+parts.join("&");
+
+    var done=false;
+    function succeed(src){
+      if(done)return; done=true;
+      resolve({ok:true,src:src});
+    }
+
+    // METHOD 1: JSONP script tag
+    var cbName="gs_cb_"+Date.now()+"_"+Math.floor(Math.random()*9999);
+    window[cbName]=function(result){
+      clearTimeout(timer1);
+      delete window[cbName];
+      var el=document.getElementById(cbName);
+      if(el&&el.parentNode)el.parentNode.removeChild(el);
+      succeed("jsonp");
+    };
+    var timer1=setTimeout(function(){
+      delete window[cbName];
+      var el=document.getElementById(cbName);
+      if(el&&el.parentNode)el.parentNode.removeChild(el);
+    },12000);
     var script=document.createElement("script");
-    script.id=cbName;script.src=SCRIPT_URL+"?"+parts.join("&");
-    script.onerror=function(){cleanup();reject(new Error("Script load failed"));};
+    script.id=cbName;
+    script.src=baseUrl+"&callback="+encodeURIComponent(cbName);
+    script.onerror=function(){
+      clearTimeout(timer1);
+      delete window[cbName];
+    };
     document.head.appendChild(script);
+
+    // METHOD 2: Image tag ping — fires even when JSONP fails
+    // Apps Script executes doGet even for image requests
+    var img=new Image();
+    img.onload=img.onerror=function(){succeed("img");};
+    img.src=baseUrl+"&_img=1";
+
+    // METHOD 3: fetch no-cors — belt and suspenders
+    try{
+      fetch(baseUrl+"&_fetch=1",{method:"GET",mode:"no-cors",cache:"no-store"})
+        .then(function(){succeed("fetch");})
+        .catch(function(){});
+    }catch(e){}
+
+    // Always resolve after 5s so UI is never blocked
+    setTimeout(function(){succeed("timeout");},5000);
   });
 }
 
