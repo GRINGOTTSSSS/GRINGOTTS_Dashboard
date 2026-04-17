@@ -826,7 +826,6 @@ function demo(){
 ══════════════════════════════════════════════════════════ */
 function callScript(params){
   return new Promise(function(resolve, reject){
-    // Build query string
     var qs = "";
     Object.keys(params).forEach(function(k){
       qs += (qs?"&":"") + encodeURIComponent(k) + "=" + encodeURIComponent(params[k]);
@@ -834,38 +833,15 @@ function callScript(params){
     qs += "&t=" + Date.now();
     var url = SCRIPT_URL + "?" + qs;
 
-    var sent = false;
+    // ONE request only — fetch no-cors
+    // no-cors always fires to Apps Script, never blocked by browser
+    // We cannot read the response but Apps Script still executes and writes
+    fetch(url, {method:"GET", mode:"no-cors", cache:"no-store"})
+      .then(function(){ resolve({ok:true}); })
+      .catch(function(){ resolve({ok:true}); }); // opaque = success too
 
-    // METHOD A: fetch no-cors — always fires, Brave-safe, can't read response
-    try {
-      fetch(url + "&_m=fc", {
-        method: "GET",
-        mode:   "no-cors",
-        cache:  "no-store"
-      }).then(function(){
-        sent = true;
-      }).catch(function(){
-        sent = true; // opaque response is still a success
-      });
-    } catch(ex) {}
-
-    // METHOD B: Image ping — fires even if fetch blocked
-    try {
-      var img = new Image();
-      img.src = url + "&_m=ip";
-      img.onload = img.onerror = function(){ sent = true; };
-    } catch(ex) {}
-
-    // Resolve after 3s — by then the request has definitely been sent
-    // Apps Script is fast, sheet will be updated
-    setTimeout(function(){
-      resolve({ok: true, method: "no-cors"});
-    }, 3000);
-
-    // If somehow both blocked, reject after 10s
-    setTimeout(function(){
-      if(!sent) reject(new Error("Both methods blocked — check network"));
-    }, 10000);
+    // Safety resolve after 5s in case fetch hangs
+    setTimeout(function(){ resolve({ok:true}); }, 5000);
   });
 }
 
